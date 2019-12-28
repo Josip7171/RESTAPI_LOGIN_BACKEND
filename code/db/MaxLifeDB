@@ -1,0 +1,230 @@
+
+
+CREATE TYPE gender AS ENUM ('male', 'female');
+
+
+-- i cant create table "user", its keyword?
+CREATE TABLE person (
+   id serial PRIMARY KEY,
+   fullname VARCHAR (75) NOT NULL,
+   email VARCHAR (355) UNIQUE NOT NULL,
+   password VARCHAR (50) NOT NULL,
+   active boolean not null default true,
+   created_on TIMESTAMP NOT NULL default now(),
+   updated_on TIMESTAMP default now(),
+   last_login TIMESTAMP default now()
+);
+
+
+CREATE TABLE person_details (
+	id serial primary key,
+	person_id int references person(id),
+	gender gender default null,
+	date_of_birth DATE default null,
+	address VARCHAR (50) default null,
+	phone_number INT default null,
+	city VARCHAR (50) default null
+);
+
+INSERT INTO person (fullname, email, password)
+values ('Josip test', 'test@gmail.com', '123');
+
+
+
+CREATE TYPE periods AS ENUM ('1 week' ,'1 month', '1 year', '5 years', '10 years');
+CREATE TYPE must_acomplish_enum AS ENUM ('economics' ,'things', 'personal_dev');
+
+create table mustlist (
+	id serial PRIMARY KEY,
+	must_acomplish varchar(100) not null,
+	must_acomplish_group must_acomplish_enum not null,
+	period_group periods not null,
+	done boolean not null default false,
+	completed boolean default false,
+	deleted boolean default false,
+	created_on TIMESTAMP NOT NULL default now(),
+    updated_on TIMESTAMP,
+    person_id INT references person(id) not null
+);
+
+insert into mustlist (must_acomplish, must_acomplish_group, period_group, created_on, person_id)
+values ('test', 'personal_dev', '1 year', NOW(), 1);
+
+
+
+create table projects(
+	id serial primary key,
+	person_id int references person(id) not null,
+	subproject_for int,
+	name varchar(50) not null,
+	outcome varchar(200) not null,
+	purpose varchar(200) not null,
+	actions varchar(500) not null,
+	completed boolean default false,
+	deleted boolean default false,
+	created_on TIMESTAMP NOT NULL default now(),
+    updated_on TIMESTAMP
+);
+
+insert into projects(person_id, name, outcome, purpose, actions, created_on)
+values (1, 'test', 'testtest', 'test', 'teetetetetetetst', now());
+
+
+create table mustlist_projects(
+	id serial,
+	mustlist_id int references mustlist(id) not null,
+	projects_id int references projects(id) not null,
+	created_on TIMESTAMP NOT NULL default now(),
+	updated_on TIMESTAMP,
+	primary key (id, mustlist_id, projects_id)
+);
+
+
+insert into mustlist_projects (mustlist_id, projects_id, created_on)
+values (1, 1, now());
+
+
+create table projects_images (
+	id serial primary key,
+	projects_id int references projects(id),
+	image_path varchar(25),
+	created_on TIMESTAMP NOT NULL default now(),
+	updated_on TIMESTAMP
+);
+
+
+create table notes (
+	id serial primary key,
+	name varchar(50),
+	note varchar(1000),
+	created_on TIMESTAMP NOT NULL default now(),
+	updated_on TIMESTAMP,
+	person_id int references person(id) not null
+);
+
+insert into notes (name, note, created_on, person_id)
+values ('test ', 'Note test 1¸test test', now(), 1);
+
+
+create table daily (
+	id serial primary key,
+	person_id int references person(id) not null,
+	task varchar(50) not null,
+	completed boolean default false,
+	deleted boolean default false,
+	for_date date not null default now(),
+	created_on TIMESTAMP NOT NULL default now(),
+	updated_on TIMESTAMP
+);
+
+insert into daily (person_id, task)
+values (1, 'Zavrsiti bazu podataka za projekt test');
+
+
+create table projects_daily (
+	id serial,
+	projects_id int,
+	daily_id int,
+	deleted boolean not null default false,
+	created_on TIMESTAMP NOT NULL default now(),
+	updated_on TIMESTAMP,
+	primary key(id, projects_id, daily_id)
+);
+
+insert into projects_daily (projects_id, daily_id)
+values (1, 1);
+
+
+-- where ne moze biti column name, keyword?
+create table appointments (
+	id serial primary key,
+	person_id int references person(id),
+	who_ varchar(50) not null,
+	where_ varchar(50) not null,
+	when_date date not null,
+	when_time time not null,
+	why_for_me varchar(100) not null,
+	why_for_them varchar(100) not null,
+	created_on TIMESTAMP NOT NULL default now(),
+	updated_on TIMESTAMP
+);
+
+insert into appointments (person_id, who_, where_, when_date, when_time, why_for_me, why_for_them, created_on) 
+values (1 , 'test_person', 'at test location', '2019-12-25', '12:30', 'test razlog', 'test razlog', now());
+
+
+
+create table projects_appointments (
+	id serial, 
+	person_id int references person(id) not null,
+	projects_id int references projects(id) not null,
+	appointments_id int references appointments(id) not null,
+	deleted boolean not null default false,
+	created_on TIMESTAMP NOT NULL default now(),
+	updated_on TIMESTAMP,
+	primary key (id, projects_id, appointments_id)
+);
+
+insert into projects_appointments (person_id, projects_id, appointments_id)
+values (1, 1, 1);
+
+
+
+create table finances_types (
+	id serial primary key,
+	type_name varchar(50) not null,
+	created_on TIMESTAMP NOT NULL default now(),
+	updated_on TIMESTAMP
+);
+
+insert into finances_types (type_name)
+values ('Foods'), ('Fuel'), ('Taxes'), ('Giving');
+
+
+
+create table finances (
+	id serial primary key,
+	person_id int references person(id) not null,
+	type_id int references finances_types(id) not null,
+	amount decimal(12,2) not null,
+	buyed varchar(50) not null,
+	deleted boolean not null default false,
+	created_on TIMESTAMP NOT NULL default now(),
+	updated_on TIMESTAMP
+);
+
+insert into finances (person_id, type_id, amount, buyed)
+values (1, 1, 100.00, 'meat');
+
+
+create table projects_finances (
+	id serial,
+	projects_id int references projects(id) not null,
+	finances_id int references finances(id) not null,
+	deleted boolean not null default false,
+	created_on TIMESTAMP NOT NULL default now(),
+	updated_on TIMESTAMP,
+	primary key (id, projects_id, finances_id)
+);
+
+insert into projects_finances (projects_id, finances_id)
+values (1, 1);
+
+
+create table current_fitness (
+	id serial primary key,
+	person_id int references person(id) not null,
+	weight decimal(5,2),
+	height decimal(5,2),
+	age int,
+	body_fat decimal(5,2),
+	min_hr int,
+	max_hr int,
+	created_on TIMESTAMP NOT NULL default now(),
+	updated_on TIMESTAMP
+);
+
+
+
+
+
