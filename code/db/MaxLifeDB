@@ -8,7 +8,7 @@ CREATE TABLE person (
    id serial PRIMARY KEY,
    fullname VARCHAR (75) NOT NULL,
    email VARCHAR (355) UNIQUE NOT NULL,
-   password VARCHAR (50) NOT NULL,
+   password VARCHAR (100) NOT NULL,
    active boolean not null default true,
    created_on TIMESTAMP NOT NULL default now(),
    updated_on TIMESTAMP default now(),
